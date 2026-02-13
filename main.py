@@ -9,27 +9,46 @@ import io
 app = FastAPI(title="Smart Agriculture Multi-Model API")
 
 # =========================================
-# LOAD MODELS (Load once at startup)
+# GLOBAL VARIABLES (Empty at start)
 # =========================================
 
-# ---- Crop Disease Model (Image Based) ----
-disease_model = tf.keras.models.load_model("models/crop_disease_model.keras")
-
-with open("data/class_names.pkl", "rb") as f:
-    disease_classes = pickle.load(f)
-
-with open("data/disease_info.pkl", "rb") as f:
-    disease_info = pickle.load(f)
-
-# ---- Crop Recommendation Model (Numerical) ----
-with open("models/crop_recommendation_model.pkl", "rb") as f:
-    recommendation_model = pickle.load(f)
-
-with open("encoders/label_encoder.pkl", "rb") as f:
-    label_encoder = pickle.load(f)
+disease_model = None
+disease_classes = None
+disease_info = None
+recommendation_model = None
+label_encoder = None
 
 # =========================================
-# HOME
+# LOAD MODELS ON STARTUP (IMPORTANT FIX)
+# =========================================
+
+@app.on_event("startup")
+def load_models():
+    global disease_model, disease_classes, disease_info
+    global recommendation_model, label_encoder
+
+    print("Loading models...")
+
+    # ---- Load Disease Model (.keras) ----
+    disease_model = tf.keras.models.load_model("models/crop_disease_model.keras")
+
+    with open("data/class_names.pkl", "rb") as f:
+        disease_classes = pickle.load(f)
+
+    with open("data/disease_info.pkl", "rb") as f:
+        disease_info = pickle.load(f)
+
+    # ---- Load Recommendation Model (.pkl) ----
+    with open("models/crop_recommendation_model.pkl", "rb") as f:
+        recommendation_model = pickle.load(f)
+
+    with open("encoders/label_encoder.pkl", "rb") as f:
+        label_encoder = pickle.load(f)
+
+    print("Models loaded successfully!")
+
+# =========================================
+# HOME ROUTE
 # =========================================
 
 @app.get("/")
