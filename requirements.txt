@@ -4,3 +4,4 @@ tensorflow-cpu==2.13.0
 numpy
 pillow
 scikit-learn
+python-multipart
